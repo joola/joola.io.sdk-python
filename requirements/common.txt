@@ -1,0 +1,5 @@
+git+https://github.com/charles-vdulac/django-roa/.git@master#egg=django_roa
+Django
+restkit
+djangorestframework
+django-filter

@@ -8,5 +8,9 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install -r requirements/development.txt
+  - pip install coveralls
 
 script: nose2 -v --with-cov
+
+after_success:
+  - coveralls

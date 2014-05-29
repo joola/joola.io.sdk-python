@@ -2,3 +2,5 @@ nose2>=0.4.7
 fake-factory
 httpretty
 pretend
+mock
+nose2-cov=1.0a4

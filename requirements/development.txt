@@ -3,4 +3,4 @@ fake-factory
 httpretty
 pretend
 mock
-nose2-cov=1.0a4
+nose2-cov==1.0a4

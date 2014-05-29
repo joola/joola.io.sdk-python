@@ -1,33 +1,30 @@
 from demands import HTTPServiceClient
 from httpcache import CachingHTTPAdapter
-from requests import auth
+from requests.auth import AuthBase
+import six
 
 
-class JoolaAuth(auth.AuthBase):
-    def __init__(self, api_token=None, user_token=None, username=None, password=None):
-        self.username = username
-        self.password = password
+class APITokenAuth(AuthBase):
+    def __init__(self, api_token):
+        if not isinstance(api_token, six.string_types):
+            raise TypeError('a string is required')
+
         self.api_token = api_token
-        self.user_token = user_token
-
-        if self.username and self.password and not self.api_token:
-            raise TypeError('An API token was not provided.')
-
-        if not self.username and self.password and self.api_token:
-            raise TypeError('The username was not provided.')
-
-        if self.username and not self.password and self.api_token:
-            raise TypeError('The password was not provided.')
 
     def __call__(self, r):
-        r.headers['Authorization'] = 'token %s' % self.user_token
+        r.headers['Authorization'] = 'token %s' % self.api_token
 
         return r
 
 
 class JoolaBaseClient(HTTPServiceClient):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, workspace=None, username=None, password=None, api_token=None, *args, **kwargs):
         self.mount('http://', CachingHTTPAdapter())
         self.mount('https://', CachingHTTPAdapter())
+
+        if api_token:
+            self.auth = APITokenAuth(api_token)
+        else:
+            self.auth = ('%s/%s' % (workspace, username), password)
 
         super(JoolaBaseClient, self).__init__(*args, **kwargs)

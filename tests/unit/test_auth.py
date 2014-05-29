@@ -1,30 +1,61 @@
 from faker import Factory
 import httpretty
 from nose2.tools import such
-from pyjoola.client import JoolaAuth
+from pretend import stub
+from pyjoola.client import APITokenAuth
 
-with such.A("Joola authentication backend") as it:
-    @it.should("raise a type error when username and password are provided but no API token is provided")
-    def test_raise_a_type_error_when_username_and_password_are_provided_but_no_API_token_is_provided(case):
-        faker = Factory.create()
-        username = faker.simple_profile()['username']
+with such.A("API authentication backend") as it:
+    @it.should("raise a type error when the api token is not a string")
+    def test_raise_a_type_error_when_the_api_key_is_not_a_string(case):
+        api_token = object()
         
-        with case.assertRaisesRegexp(TypeError, "An API token was not provided."):
-            JoolaAuth(username=username, password=faker.password())
+        with case.assertRaisesRegexp(TypeError, "a string is required"):
+            APITokenAuth(api_token)
 
-    @it.should("raise a type error when password and the API token are provided but no username is provided")
-    def test_raise_a_type_error_when_password_and_the_api_token_are_provided_but_no_API_token_is_provided(case):
+    @it.should("assign the provided api token to the api_token attribute")
+    def test_should_assign_the_provided_api_token_to_the_api_token_attribute(case):
         faker = Factory.create()
+        expected = faker.sha256()
 
-        with case.assertRaisesRegexp(TypeError, "The username was not provided."):
-            JoolaAuth(api_token=faker.sha256(), password=faker.password())
+        sut = APITokenAuth(expected)
 
-    @it.should("raise a type error when username and the API token are provided but no password is provided")
-    def test_raise_a_type_error_when_username_and_the_api_token_are_provided_but_no_API_token_is_provided(case):
+        actual = sut.api_token
+        case.assertEqual(actual, expected)
+
+    @it.should("return the request after authenticating")
+    def test_return_the_request_after_authenticating(case):
         faker = Factory.create()
-        username = faker.simple_profile()['username']
+        api_token = faker.sha256()
+        expected = stub(headers={})
 
-        with case.assertRaisesRegexp(TypeError, "The password was not provided."):
-            JoolaAuth(api_token=faker.sha256(), username=username)
+        sut = APITokenAuth(api_token)
+
+        actual = sut(expected)
+
+        case.assertEqual(actual, expected)
+
+    @it.should('add the authorization header to the request')
+    def test_add_the_authorization_header_to_the_request(case):
+        faker = Factory.create()
+        api_token = faker.sha256()
+        expected = 'Authorization'
+
+        sut = APITokenAuth(api_token)
+
+        authenticated_request = sut(stub(headers={}))
+
+        actual = authenticated_request.headers
+        case.assertIn(expected, actual)
+
+    @it.should("add a header to the request with the provided api token")
+    def test_add_a_header_to_the_request_with_the_provided_api_token(case):
+        faker = Factory.create()
+        api_token = faker.sha256()
+        expected = 'token %s' % api_token
+
+        sut = APITokenAuth(api_token)
+
+        actual = sut(stub(headers={})).headers['Authorization']
+        case.assertEqual(actual, expected)
 
     it.createTests(globals())

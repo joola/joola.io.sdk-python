@@ -6,13 +6,6 @@ from pyjoola.client import APITokenAuth
 
 
 with such.A("API authentication backend") as it:
-    @it.should("raise a type error when the api token is not a string")
-    def test_raise_a_type_error_when_the_api_key_is_not_a_string(case):
-        api_token = object()
-        
-        with case.assertRaisesRegexp(TypeError, "a string is required"):
-            APITokenAuth(api_token)
-
     @it.should("assign the provided api token to the api_token attribute")
     def test_should_assign_the_provided_api_token_to_the_api_token_attribute(case):
         faker = Factory.create()

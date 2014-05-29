@@ -17,13 +17,13 @@ class APITokenAuth(AuthBase):
         return r
 
 
-class Credentials(namedtuple('CredentialsBase', ['workspace', 'username', 'password'])):
+class Credentials(namedtuple('CredentialsBase', ['username', 'password'])):
     def __new__(cls, workspace, username, password):
         workspace = str(workspace)
-        username = str(username)
+        username = '%s/%s' % (workspace, str(username))
         password = str(password)
 
-        return super(Credentials, cls).__new__(cls, workspace, username, password)
+        return super(Credentials, cls).__new__(cls, username, password)
 
 
 class JoolaBaseClient(HTTPServiceClient):
@@ -34,6 +34,6 @@ class JoolaBaseClient(HTTPServiceClient):
         if api_token:
             self.auth = APITokenAuth(api_token)
         elif credentials:
-            self.auth = ('%s/%s' % (credentials.workspace, credentials.username), credentials.password)
+            self.auth = credentials
 
         super(JoolaBaseClient, self).__init__(*args, **kwargs)

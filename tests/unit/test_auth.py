@@ -1,8 +1,9 @@
 from faker import Factory
-import httpretty
 from nose2.tools import such
 from pretend import stub
+
 from pyjoola.client import APITokenAuth
+
 
 with such.A("API authentication backend") as it:
     @it.should("raise a type error when the api token is not a string")

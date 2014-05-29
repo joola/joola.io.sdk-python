@@ -27,13 +27,13 @@ class Credentials(namedtuple('CredentialsBase', ['workspace', 'username', 'passw
 
 
 class JoolaBaseClient(HTTPServiceClient):
-    def __init__(self, workspace=None, username=None, password=None, api_token=None, *args, **kwargs):
+    def __init__(self, credentials=None, api_token=None, *args, **kwargs):
         self.mount('http://', CachingHTTPAdapter())
         self.mount('https://', CachingHTTPAdapter())
 
         if api_token:
             self.auth = APITokenAuth(api_token)
-        elif workspace and username and password:
-            self.auth = ('%s/%s' % (workspace, username), password)
+        elif credentials:
+            self.auth = ('%s/%s' % (credentials.workspace, credentials.username), credentials.password)
 
         super(JoolaBaseClient, self).__init__(*args, **kwargs)

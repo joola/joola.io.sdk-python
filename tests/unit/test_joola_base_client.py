@@ -76,7 +76,7 @@ with such.A("Joola client") as it:
 
         sut = JoolaBaseClient(url)
 
-        actual = sut.list().content
+        actual = str(sut.list().content)
 
         case.assertEqual(actual, expected)
         httpretty.disable()
@@ -94,7 +94,7 @@ with such.A("Joola client") as it:
 
         sut = JoolaBaseClient(url)
 
-        actual = sut.get(identifier).content
+        actual = str(sut.get(identifier).content)
 
         case.assertEqual(actual, expected)
         httpretty.disable()
@@ -111,7 +111,7 @@ with such.A("Joola client") as it:
         expected = str(data)
         httpretty.register_uri(httpretty.POST, url, body=expected, content_type="application/json")
 
-        actual = sut.insert(**data).content
+        actual = str(sut.insert(**data).content)
 
         case.assertEqual(actual, expected)
         httpretty.disable()
@@ -130,7 +130,7 @@ with such.A("Joola client") as it:
         httpretty.register_uri(httpretty.PATCH, '%s%s' % (url, identifier), body=expected,
                                content_type="application/json")
 
-        actual = sut.patch(identifier, **data).content
+        actual = str(sut.patch(identifier, **data).content)
 
         case.assertEqual(actual, expected)
         httpretty.disable()
@@ -149,7 +149,7 @@ with such.A("Joola client") as it:
         httpretty.register_uri(httpretty.PATCH, '%s%s' % (url, identifier), body=expected,
                                content_type="application/json")
 
-        actual = sut.patch(identifier, **data).content
+        actual = str(sut.patch(identifier, **data).content)
 
         case.assertEqual(actual, expected)
         httpretty.disable()

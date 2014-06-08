@@ -1,8 +1,8 @@
 from faker import Factory
 from httpcache import CachingHTTPAdapter
+import httpretty
 import mock
 from nose2.tools import such
-from requests.auth import HTTPBasicAuth
 
 from pyjoola.client import JoolaBaseClient, APITokenAuth, Credentials
 
@@ -56,7 +56,7 @@ with such.A("Joola client") as it:
 
         case.assertIn('http://', sut.adapters)
         case.assertIsInstance(sut.adapters['http://'], CachingHTTPAdapter)
-        
+
     @it.should("mount the caching adapters on https://")
     def test_mount_the_caching_adapters_on_https(case):
         faker = Factory.create()
@@ -65,5 +65,94 @@ with such.A("Joola client") as it:
 
         case.assertIn('https://', sut.adapters)
         case.assertIsInstance(sut.adapters['https://'], CachingHTTPAdapter)
+
+    @it.should("retrieve all objects")
+    def test_retrieve_all_objects(case):
+        httpretty.enable()
+        faker = Factory.create()
+        url = faker.url()
+        expected = str(faker.pydict())
+        httpretty.register_uri(httpretty.GET, url, body=expected, content_type="application/json")
+
+        sut = JoolaBaseClient(url)
+
+        actual = sut.list().content
+
+        case.assertEqual(actual, expected)
+        httpretty.disable()
+        httpretty.reset()
+
+    @it.should("retrieve one object by it's identifier")
+    def test_retrieve_one_object_by_its_identifier(case):
+        httpretty.enable()
+        faker = Factory.create()
+        url = faker.url()
+        identifier = faker.slug()
+        expected = str(faker.pydict())
+        httpretty.register_uri(httpretty.GET, '%s%s' % (url, identifier), body=expected,
+                               content_type="application/json")
+
+        sut = JoolaBaseClient(url)
+
+        actual = sut.get(identifier).content
+
+        case.assertEqual(actual, expected)
+        httpretty.disable()
+        httpretty.reset()
+
+    @it.should("create one object")
+    def test_create_one_object(case):
+        httpretty.enable()
+        faker = Factory.create()
+        url = faker.url()
+        sut = JoolaBaseClient(url)
+
+        data = faker.pydict()
+        expected = str(data)
+        httpretty.register_uri(httpretty.POST, url, body=expected, content_type="application/json")
+
+        actual = sut.insert(**data).content
+
+        case.assertEqual(actual, expected)
+        httpretty.disable()
+        httpretty.reset()
+
+    @it.should("update one object by it's identifier")
+    def test_update_one_object_by_its_identifier(case):
+        httpretty.enable()
+        faker = Factory.create()
+        url = faker.url()
+        identifier = faker.slug()
+        sut = JoolaBaseClient(url)
+
+        data = faker.pydict()
+        expected = str(data)
+        httpretty.register_uri(httpretty.PATCH, '%s%s' % (url, identifier), body=expected,
+                               content_type="application/json")
+
+        actual = sut.patch(identifier, **data).content
+
+        case.assertEqual(actual, expected)
+        httpretty.disable()
+        httpretty.reset()
+
+    @it.should("delete one object by it's identifier")
+    def test_delete_one_object_by_its_identifier(case):
+        httpretty.enable()
+        faker = Factory.create()
+        url = faker.url()
+        identifier = faker.slug()
+        sut = JoolaBaseClient(url)
+
+        data = faker.pydict()
+        expected = str(data)
+        httpretty.register_uri(httpretty.PATCH, '%s%s' % (url, identifier), body=expected,
+                               content_type="application/json")
+
+        actual = sut.patch(identifier, **data).content
+
+        case.assertEqual(actual, expected)
+        httpretty.disable()
+        httpretty.reset()
 
     it.createTests(globals())

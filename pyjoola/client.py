@@ -27,8 +27,8 @@ class Credentials(namedtuple('CredentialsBase', ['username', 'password'])):
 
 
 class JoolaBaseClient(HTTPServiceClient):
-    def __init__(self, url, credentials=None, api_token=None, **kwargs):
-        super(JoolaBaseClient, self).__init__(url, **kwargs)
+    def __init__(self, base_url, credentials=None, api_token=None, **kwargs):
+        super(JoolaBaseClient, self).__init__(base_url, **kwargs)
 
         self.mount('http://', CachingHTTPAdapter())
         self.mount('https://', CachingHTTPAdapter())
@@ -37,4 +37,19 @@ class JoolaBaseClient(HTTPServiceClient):
             self.auth = APITokenAuth(api_token)
         elif credentials:
             self.auth = credentials
+
+    def list(self):
+        return self.get('')
+
+    def get(self, lookup):
+        return super(JoolaBaseClient, self).get(str(lookup))
+
+    def insert(self, **kwargs):
+        return super(JoolaBaseClient, self).post('', data=kwargs)
+
+    def patch(self, lookup, **kwargs):
+        return super(JoolaBaseClient, self).patch(str(lookup), data=kwargs)
+
+    def delete(self, lookup):
+        return super(JoolaBaseClient, self).delete(str(id))
 

@@ -1,5 +1,4 @@
 schematics
 requests
 httpcache
-demands
 six

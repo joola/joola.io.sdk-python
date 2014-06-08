@@ -14,7 +14,7 @@ with such.A("Joola client") as it:
         url = faker.uri()
         sut = JoolaBaseClient(url)
 
-        case.assertIsNone(sut.auth)
+        case.assertIsNone(sut.session.auth)
 
     @it.should("select the API token authentication mechanism if an api token was provided")
     def test_select_the_api_token_authentication_mechanism_if_an_api_token_was_provided(case):
@@ -23,7 +23,7 @@ with such.A("Joola client") as it:
         api_token = faker.sha256()
         sut = JoolaBaseClient(url, api_token=api_token)
 
-        case.assertIsInstance(sut.auth, APITokenAuth)
+        case.assertIsInstance(sut.session.auth, APITokenAuth)
 
     @it.should("initialize the API token authentication mechanism with the provided api token")
     def test_have_no_authentication_mechanism_if_no_credentials_and_no_api_token_was_specified(case):
@@ -45,7 +45,7 @@ with such.A("Joola client") as it:
         expected = Credentials(workspace, username, password)
         sut = JoolaBaseClient(url, credentials=expected)
 
-        actual = sut.auth
+        actual = sut.session.auth
         case.assertEqual(actual, expected)
 
     @it.should("mount the caching adapters on http://")
@@ -54,8 +54,8 @@ with such.A("Joola client") as it:
         url = faker.uri()
         sut = JoolaBaseClient(url)
 
-        case.assertIn('http://', sut.adapters)
-        case.assertIsInstance(sut.adapters['http://'], CachingHTTPAdapter)
+        case.assertIn('http://', sut.session.adapters)
+        case.assertIsInstance(sut.session.adapters['http://'], CachingHTTPAdapter)
 
     @it.should("mount the caching adapters on https://")
     def test_mount_the_caching_adapters_on_https(case):
@@ -63,8 +63,8 @@ with such.A("Joola client") as it:
         url = faker.uri()
         sut = JoolaBaseClient(url)
 
-        case.assertIn('https://', sut.adapters)
-        case.assertIsInstance(sut.adapters['https://'], CachingHTTPAdapter)
+        case.assertIn('https://', sut.session.adapters)
+        case.assertIsInstance(sut.session.adapters['https://'], CachingHTTPAdapter)
 
     @it.should("retrieve all objects")
     def test_retrieve_all_objects(case):

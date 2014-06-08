@@ -1,7 +1,7 @@
 from collections import namedtuple
 
-from demands import HTTPServiceClient
 from httpcache import CachingHTTPAdapter
+from requests import Session
 from requests.auth import AuthBase
 
 
@@ -26,30 +26,31 @@ class Credentials(namedtuple('CredentialsBase', ['username', 'password'])):
         return super(Credentials, cls).__new__(cls, username, password)
 
 
-class JoolaBaseClient(HTTPServiceClient):
+class JoolaBaseClient(object):
     def __init__(self, base_url, credentials=None, api_token=None, **kwargs):
-        super(JoolaBaseClient, self).__init__(base_url, **kwargs)
+        self.base_url = str(base_url)
+        self.session = Session()
 
-        self.mount('http://', CachingHTTPAdapter())
-        self.mount('https://', CachingHTTPAdapter())
+        self.session.mount('http://', CachingHTTPAdapter())
+        self.session.mount('https://', CachingHTTPAdapter())
 
         if api_token:
-            self.auth = APITokenAuth(api_token)
+            self.session.auth = APITokenAuth(api_token)
         elif credentials:
-            self.auth = credentials
+            self.session.auth = credentials
 
     def list(self):
-        return self.get('')
+        return self.session.get(self.base_url)
 
     def get(self, lookup):
-        return super(JoolaBaseClient, self).get(str(lookup))
+        return self.session.get('%s%s' % (self.base_url, str(lookup)))
 
     def insert(self, **kwargs):
-        return super(JoolaBaseClient, self).post('', data=kwargs)
+        return self.session.post(self.base_url, data=kwargs)
 
     def patch(self, lookup, **kwargs):
-        return super(JoolaBaseClient, self).patch(str(lookup), data=kwargs)
+        return self.session.patch('%s%s' % (self.base_url, str(lookup)), data=kwargs)
 
     def delete(self, lookup):
-        return super(JoolaBaseClient, self).delete(str(id))
+        return self.session.delete('%s%s' % (self.base_url, str(lookup)))
 
